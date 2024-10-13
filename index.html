@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Check</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+            margin-top: 50px;
+        }
+        #checking {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+        #progress {
+            width: 80%;
+            background-color: #ccc;
+            margin: 0 auto;
+            padding: 3px;
+            border-radius: 5px;
+        }
+        #bar {
+            width: 1%;
+            height: 30px;
+            background-color: #4caf50;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Checking Your System...</h1>
+    <p id="checking">Checking CPU...</p>
+    
+    <div id="progress">
+        <div id="bar"></div>
+    </div>
+    
+    <script>
+        let progress = 1;
+        const progressBar = document.getElementById('bar');
+        const checkingText = document.getElementById('checking');
+        
+        function updateProgress() {
+            progress += Math.random() * 10;
+            if (progress >= 100) {
+                progress = 100;
+                checkingText.textContent = 'System check complete!';
+                setTimeout(redirectToRickRoll, 1000); // After 1 second, redirect
+            } else if (progress > 90) {
+                checkingText.textContent = 'Checking RAM...';
+            } else if (progress > 70) {
+                checkingText.textContent = 'Checking GPU...';
+            } else if (progress > 50) {
+                checkingText.textContent = 'Checking Disk Space...';
+            } else if (progress > 30) {
+                checkingText.textContent = 'Checking Network Speed...';
+            } else if (progress > 10) {
+                checkingText.textContent = 'Checking CPU...';
+            }
+            
+            progressBar.style.width = progress + '%';
+        }
+        
+        function redirectToRickRoll() {
+            window.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"; // Rick Roll video
+        }
+        
+        setInterval(updateProgress, 500); // Update every 500 milliseconds
+    </script>
+</body>
+</html>
