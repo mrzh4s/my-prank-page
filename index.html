@@ -1,74 +1,427 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>System Check</title>
+    <title>Windows Update</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #f0f0f0;
-            margin-top: 50px;
+        @font-face {
+            font-family: 'Segoe UI Variable';
+            src: local('Segoe UI Variable'), local('Segoe UI');
+            font-weight: 400;
         }
-        #checking {
-            font-size: 20px;
+
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI Variable', 'Segoe UI', sans-serif;
+            background-color: #000000;
+            color: white;
+            overflow: hidden;
+        }
+
+        .screen {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            transition: opacity 0.5s ease-in-out;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .start-screen,
+        .intro-screen {
+            background-color: #000000;
+        }
+
+        .update-screen {
+            background-color: #000000;
+            display: none;
+        }
+
+        .windows-logo {
+            width: 150px;
+            height: 150px;
+            margin-bottom: 40px;
+            animation: fadePulse 2s infinite;
+        }
+
+        @keyframes fadePulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .intro-content {
+            position: relative;
+            max-width: 800px;
+            text-align: left;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .intro-content h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .intro-content p {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            font-weight: 400;
+            color: #e0e0e0;
+        }
+
+        .intro-content ul {
+            list-style-type: none;
             margin-bottom: 20px;
         }
-        #progress {
-            width: 80%;
-            background-color: #ccc;
-            margin: 0 auto;
-            padding: 3px;
-            border-radius: 5px;
+
+        .intro-content li {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            padding-left: 25px;
+            position: relative;
         }
-        #bar {
-            width: 1%;
-            height: 30px;
-            background-color: #4caf50;
-            border-radius: 5px;
+
+        .intro-content li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #60cdff;
+        }
+
+        .button-container {
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .update-button {
+            background-color: #0078d4;
+            color: #ffffff;
+            border: none;
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-family: 'Segoe UI Variable', 'Segoe UI', sans-serif;
+            font-weight: 400;
+            transition: background-color 0.2s ease;
+        }
+
+        .update-button:hover {
+            background-color: #1a86d9;
+        }
+
+        .update-button:active {
+            background-color: #006cbe;
+        }
+
+        .update__content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .update__spinner {
+            text-align: center;
+            margin: 20px;
+        }
+
+        .update__text {
+            text-align: center;
+            color: #ffffff;
+            font-family: 'Segoe UI Variable', 'Segoe UI', sans-serif;
+            font-size: 20px;
+            line-height: 30px;
+        }
+
+        .update__loader {
+            height: 50px;
+            width: 50px;
+            margin: 20px;
+        }
+
+        .update__spinner {
+            width: 50px;
+            height: 50px;
+            border-radius: 50px;
+            position: absolute;
+            margin: 0;
+            animation-name: rotate;
+            animation-duration: 1.4s;
+            animation-timing-function: cubic-bezier(0.05, 0.57, 0.63, 0.38);
+            animation-delay: 0s;
+            animation-iteration-count: infinite;
+        }
+
+        .update__spinner--second {
+            animation-delay: 0.2s;
+        }
+
+        .update__spinner--third {
+            animation-delay: 0.4s;
+        }
+
+        .update__spinner--four {
+            animation-delay: 0.6s;
+        }
+
+        .update__spinner--five {
+            animation-delay: 0.8s;
+        }
+
+        .update__spinner--six {
+            animation-delay: 1s;
+        }
+
+        .spinner__point {
+            width: 7px;
+            height: 7px;
+            border-radius: 10px;
+            background-color: white;
+        }
+
+        @keyframes rotate {
+            0% {
+                transform: rotate(0.7turn)
+            }
+
+            100% {
+                transform: rotate(1.7turn)
+            }
+        }
+
+        #videoContainer {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+        }
+
+        #rickRollVideo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
     </style>
 </head>
+
 <body>
-    <h1>Checking Your System...</h1>
-    <p id="checking">Checking CPU...</p>
-    
-    <div id="progress">
-        <div id="bar"></div>
+    <!-- The rest of the HTML remains the same -->
+    <div class="screen start-screen" id="startScreen">
+        <svg class="windows-logo" viewBox="0 0 88 88" xmlns="http://www.w3.org/2000/svg">
+            <path
+                d="M0,12.402,35.687,7.571,35.7,41.8,0,41.982Zm35.67,33.529L35.687,80l-35.687-5V46.6Zm4.326-39.17L87.314,0V41.463l-47.318.376ZM87.314,46.255l-.001,41.475-47.318-6.497-.016-34.98Z"
+                fill="#ffffff" />
+        </svg>
     </div>
-    
+
+    <div class="screen intro-screen" id="introScreen" style="display: none;">
+        <svg class="windows-logo" viewBox="0 0 88 88" xmlns="http://www.w3.org/2000/svg">
+            <path
+                d="M0,12.402,35.687,7.571,35.7,41.8,0,41.982Zm35.67,33.529L35.687,80l-35.687-5V46.6Zm4.326-39.17L87.314,0V41.463l-47.318.376ZM87.314,46.255l-.001,41.475-47.318-6.497-.016-34.98Z"
+                fill="#ffffff" />
+        </svg>
+        <div class="intro-content">
+            <h1>Windows 11 Update</h1>
+            <p>We're excited to bring you the latest features and improvements to enhance your Windows 11 experience.
+            </p>
+            <p>This update includes:</p>
+            <ul>
+                <li>Enhanced security features for better protection</li>
+                <li>Improved system performance and stability</li>
+                <li>New productivity tools to streamline your workflow</li>
+                <li>Refined user interface for a more intuitive experience</li>
+            </ul>
+            <p>The update process may take some time. Please ensure your device is plugged in and do not turn off your
+                computer during the update.</p>
+            <div class="button-container">
+                <button class="update-button" id="startUpdateButton">Start Update</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="screen update-screen" id="updateScreen">
+        <div class="update__content">
+            <div class="update__loader">
+                <div class="update__spinner">
+                    <div class="spinner__point"></div>
+                </div>
+                <div class="update__spinner update__spinner--second">
+                    <div class="spinner__point"></div>
+                </div>
+                <div class="update__spinner update__spinner--third">
+                    <div class="spinner__point"></div>
+                </div>
+                <div class="update__spinner update__spinner--four">
+                    <div class="spinner__point"></div>
+                </div>
+                <div class="update__spinner update__spinner--five">
+                    <div class="spinner__point"></div>
+                </div>
+            </div>
+
+            <div class="update__text">
+                <p>Working on updates</p>
+                <p id="update__percentage">0% complete</p>
+                <p>Don't turn off your computer</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="videoContainer">
+        <video id="rickRollVideo" controls>
+            <source src="rickroll.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+
     <script>
-        let progress = 1;
-        const progressBar = document.getElementById('bar');
-        const checkingText = document.getElementById('checking');
-        
-        function updateProgress() {
-            progress += Math.random() * 10;
-            if (progress >= 100) {
-                progress = 100;
-                checkingText.textContent = 'System check complete!';
-                setTimeout(redirectToRickRoll, 1000); // After 1 second, redirect
-            } else if (progress > 90) {
-                checkingText.textContent = 'Checking RAM...';
-            } else if (progress > 70) {
-                checkingText.textContent = 'Checking GPU...';
-            } else if (progress > 50) {
-                checkingText.textContent = 'Checking Disk Space...';
-            } else if (progress > 30) {
-                checkingText.textContent = 'Checking Network Speed...';
-            } else if (progress > 10) {
-                checkingText.textContent = 'Checking CPU...';
+        // The JavaScript remains the same
+        let percentage = 0;
+        let currentTime;
+        let time = 120000;
+        let refresh = 1000; // 1 second
+        let isFullscreen = false;
+
+        window.onload = function () {
+            currentTime = time;
+            setTimeout(showIntroScreen, 3000); // Show intro screen after 3 seconds
+            addEventListeners();
+        }
+
+        function addEventListeners() {
+            document.addEventListener('keydown', blockKeys, true);
+            document.addEventListener('keyup', blockKeys, true);
+            document.addEventListener('keypress', blockKeys, true);
+            document.addEventListener('contextmenu', preventDefault, true);
+            document.addEventListener('selectstart', preventDefault, true);
+            document.addEventListener('dragstart', preventDefault, true);
+            document.addEventListener('touchstart', preventDefault, true);
+            document.addEventListener('touchmove', preventDefault, true);
+            document.addEventListener('touchend', preventDefault, true);
+            window.addEventListener('blur', refocusWindow);
+            document.addEventListener('fullscreenchange', handleFullscreenChange);
+            document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+            document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+            document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+        }
+
+        function blockKeys(e) {
+            const forbiddenKeys = ['F11', 'Escape', 'Tab', 'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F12'];
+            if (forbiddenKeys.includes(e.key) || e.ctrlKey || e.altKey || e.metaKey) {
+                e.stopPropagation();
+                e.preventDefault();
+                return false;
             }
-            
-            progressBar.style.width = progress + '%';
         }
-        
-        function redirectToRickRoll() {
-            window.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"; // Rick Roll video
+
+        function preventDefault(e) {
+            e.preventDefault();
         }
-        
-        setInterval(updateProgress, 500); // Update every 500 milliseconds
+
+        function refocusWindow() {
+            window.focus();
+        }
+
+        function handleFullscreenChange() {
+            if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.mozFullScreenElement && !document.msFullscreenElement) {
+                requestFullscreen();
+            }
+        }
+
+        function showIntroScreen() {
+            document.getElementById('startScreen').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('startScreen').style.display = 'none';
+                document.getElementById('introScreen').style.display = 'flex';
+                setTimeout(() => {
+                    document.getElementById('introScreen').style.opacity = '1';
+                }, 50);
+            }, 500);
+        }
+
+        function showUpdateScreen() {
+            document.getElementById('introScreen').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('introScreen').style.display = 'none';
+                document.getElementById('updateScreen').style.display = 'flex';
+                setTimeout(() => {
+                    document.getElementById('updateScreen').style.opacity = '1';
+                }, 50);
+                loading();
+                requestFullscreen();
+            }, 500);
+        }
+
+        function loading() {
+            currentTime -= refresh;
+            percentage = ((time - currentTime) * 100) / time;
+            document.querySelector('#update__percentage').innerHTML = parseInt(percentage) + '% complete';
+            if (currentTime > 0) {
+                setTimeout(loading, refresh);
+            } else {
+                showRickRoll();
+            }
+        }
+
+        function showRickRoll() {
+            document.getElementById('updateScreen').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('updateScreen').style.display = 'none';
+                document.getElementById('videoContainer').style.display = 'block';
+                const video = document.getElementById('rickRollVideo');
+                video.play();
+                video.addEventListener('ended', function () {
+                    this.currentTime = 0;
+                    this.play();
+                }, false);
+            }, 500);
+        }
+
+        function requestFullscreen() {
+            const element = document.documentElement;
+            if (element.requestFullscreen) {
+                element.requestFullscreen();
+            } else if (element.mozRequestFullScreen) {
+                element.mozRequestFullScreen();
+            } else if (element.webkitRequestFullscreen) {
+                element.webkitRequestFullscreen();
+            } else if (element.msRequestFullscreen) {
+                element.msRequestFullscreen();
+            }
+            isFullscreen = true;
+        }
+
+        document.getElementById('startUpdateButton').addEventListener('click', showUpdateScreen);
     </script>
 </body>
+
 </html>
